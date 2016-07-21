@@ -439,3 +439,21 @@ INSERT INTO `apps_countries` VALUES (null, 'YU', 'Yugoslavia');
 INSERT INTO `apps_countries` VALUES (null, 'ZR', 'Zaire');
 INSERT INTO `apps_countries` VALUES (null, 'ZM', 'Zambia');
 INSERT INTO `apps_countries` VALUES (null, 'ZW', 'Zimbabwe');
+
+
+
+##Create Domain Table
+Create table `pandadoc_domains` (domain varchar(64), name varchar(64), description text, location varchar(2083), employees int, url varchar(2083), raised_text varchar(64), raised int , linkedin varchar(2083), crunchbase varchar(2083), twitter varchar(2083), facebook varchar(2083), push char(1), last_updated datetime, industry varchar(64), created_at datetime, index(domain, location, employees, industry), primary key(domain));
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/memsql/panda_doc_analysis/pandadoc_domains.csv'
+INTO TABLE test_instance.pandadoc_domains
+FIELDS TERMINATED BY ','
+    ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(domain, name, description, location, employees, url, raised_text, raised, linkedin, crunchbase, twitter, facebook, push, last_updated, industry, created_at);
+COMMIT;
+
+
+
+
