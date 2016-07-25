@@ -107,7 +107,6 @@ for j in range(0, len(messages_striped)):
     else:
         list_of_exceptions.append(messages_striped[j])
 
-print list_of_identify[0:10]
 
 #New JSON parser
 
@@ -132,8 +131,8 @@ def json_parser_general(list_of_dicts):
 def identify_json_parser(list_of_identify_dicts):
     list_of_jsons = json_parser_general(list_of_identify_dicts)
     identify_object = []
-    id_dict = dict()
     for i in range(0, len(list_of_jsons)):
+        id_dict = dict()
         if 'traits' in list_of_jsons[i]:
             traits = list_of_jsons[i]['traits']
             for key, value in traits.items():
@@ -142,17 +141,17 @@ def identify_json_parser(list_of_identify_dicts):
             if 'company' in list_of_jsons[i]['traits']:
                 company = list_of_jsons[i]['traits']['company']
                 for key, value in company.items():
-                    new_key = "company_" + str(key)
+                    new_key = "company_" + key.encode('utf-8')
                     id_dict[new_key] = value
         if 'context' in list_of_jsons[i]:
             context = list_of_jsons[i]['context']
             for key, value in context.items():
                 if key not in ['traits', 'page', 'library', 'campaign']:
-                    con_key = "context_" + str(key)
+                    con_key = "context_" + key.encode('utf-8')
                     id_dict[con_key] = value
             page = list_of_jsons[i]['context']['page']
             for key, value in page.items():
-                page_key = "page_" + str(key)
+                page_key = "page_" + key.encode('utf-8')
                 id_dict[page_key] = value
         id_dict['user_id'] = list_of_jsons[i]['user_id']
         identify_object.append(id_dict)
@@ -258,13 +257,19 @@ def write_to_csv(list_of_dictionaries, output_name, key_name):
         fieldnames = list_of_dictionaries[0].keys()
         writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
         writer.writeheader()
+        encode_error_counter = 0
         for i in range(0, len(list_of_dictionaries)):
-            writer.writerow(list_of_dictionaries[i])
-            if i % 100000 == 0:
-                print "wrote: {0} rows \n into: {1}".format(i, csv_filename)
+            try:
+                writer.writerow(list_of_dictionaries[i])
+                if i % 1000 == 0:
+                    print "wrote: {0} rows \n into: {1}".format(i, csv_filename)
+            except UnicodeEncodeError:
+                encode_error_counter += 1
+                print "Unicode Error for: {0} \n Number errors = {1}".format(list_of_dictionaries[i], encode_error_counter)
+                continue
 
 
-identify_list_of_dicts = identify_json_parser(list_of_identify[0:1])
+identify_list_of_dicts = identify_json_parser(list_of_identify)
 
 track_list_of_dicts = track_parser(list_of_track)
 
@@ -272,6 +277,7 @@ output_file_identify = str(key_name) + "_identify"
 output_file_track = str(key_name) + "_track"
 
 write_to_csv(identify_list_of_dicts, output_file_identify, key_name)
+print "output will be length = {0}".format(len(identify_list_of_dicts))
 # write_to_csv(track_list_of_dicts, output_file_track, key_name)
 
 
