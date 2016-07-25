@@ -13,9 +13,12 @@ s3c = boto3.client('s3')
 # end_date = str(raw_input("Enter the end date in the 'yyyymmdd' format: \n"))
 
 ##FOR TESTING##
-key_name = "panda43584783"
-start_date = "20160401"
-end_date = "20160430"
+#chartio89732323  20160610 20160715
+#panda43584783
+#flow23947635
+key_name = "chartio89732323"
+start_date = "20160610"
+end_date = "20160610"
 
 
 def create_filenames(start_date, end_date, key_name):
@@ -101,7 +104,7 @@ for j in range(0, len(messages_striped)):
         list_of_exceptions.append(messages_striped[j])
 
 
-##for Pandadocs
+#for Pandadocs
 
 
 def identify_parser(identify):
@@ -191,6 +194,9 @@ def track_parser(track):
 
 def write_to_csv(list_of_dictionaries, output_name, key_name):
     csv_filename = str("/Users/austin.lee/Desktop/working/output/" + key_name + "/" + output_name + ".csv")
+    csv_directory = str("/Users/austin.lee/Desktop/working/output/" + key_name)
+    if not os.path.exists(csv_directory):
+        os.makedirs(csv_directory)
     with open(csv_filename, 'wr') as csv_output:
         fieldnames = list_of_dictionaries[0].keys()
         writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
@@ -209,4 +215,6 @@ output_file_track = str(key_name) + "_track"
 
 write_to_csv(identify_list_of_dicts, output_file_identify, key_name)
 write_to_csv(track_list_of_dicts, output_file_track, key_name)
+
+
 

@@ -19,7 +19,7 @@ s3c = boto3.client('s3')
 #flow23947635
 key_name = "chartio89732323"
 start_date = "20160615"
-end_date = "20160615"
+end_date = "20160620"
 
 
 def create_filenames(start_date, end_date, key_name):
@@ -146,18 +146,36 @@ def identify_json_parser(list_of_identify_dicts):
         if 'context' in list_of_jsons[i]:
             context = list_of_jsons[i]['context']
             for key, value in context.items():
-                if key not in ['traits', 'page', 'library', 'campaign']:
+                if key not in ['traits', 'page', 'library', 'campaign', 'user_agent']:
                     con_key = "context_" + key.encode('utf-8')
                     id_dict[con_key] = value
-            page = list_of_jsons[i]['context']['page']
-            for key, value in page.items():
-                page_key = "page_" + key.encode('utf-8')
-                id_dict[page_key] = value
+           ##save space- pulling out page info
+            # page = list_of_jsons[i]['context']['page']
+            # for key, value in page.items():
+            #     page_key = "page_" + key.encode('utf-8')
+            #     id_dict[page_key] = value
         id_dict['user_id'] = list_of_jsons[i]['user_id']
+        id_dict['time_stamp'] = list_of_jsons[i]['time']
         identify_object.append(id_dict)
     return identify_object
 
 
+def track_json_parser(list_of_track_dicts):
+    list_of_jsons = json_parser_general(list_of_track_dicts)
+    track_object = []
+    for i in range(0, len(list_of_jsons)):
+        track_dict = dict()
+        if 'properties' in list_of_jsons[i]:
+            properties = list_of_jsons[i]['properties']
+            for key, value in properties.items():
+                properties_key = "properties_" + key.encode('utf-8')
+                track_dict[properties_key] = value
+        track_dict['user_id'] = list_of_jsons[i]['user_id']
+        track_dict['time_stamp'] = list_of_jsons[i]['time']
+        track_dict['event'] = list_of_jsons[i]['event']
+        track_dict['organization_id'] = list_of_jsons[i]['organization_id']
+        track_object.append(track_dict)
+    return track_object
 
 ##QA
 
@@ -270,15 +288,17 @@ def write_to_csv(list_of_dictionaries, output_name, key_name):
 
 
 identify_list_of_dicts = identify_json_parser(list_of_identify)
-
-track_list_of_dicts = track_parser(list_of_track)
+track_list_of_dicts = track_json_parser(list_of_track)
 
 output_file_identify = str(key_name) + "_identify"
 output_file_track = str(key_name) + "_track"
 
 write_to_csv(identify_list_of_dicts, output_file_identify, key_name)
-print "output will be length = {0}".format(len(identify_list_of_dicts))
-# write_to_csv(track_list_of_dicts, output_file_track, key_name)
+write_to_csv(track_list_of_dicts, output_file_track, key_name)
+
+print "identify output will be length = {0}".format(len(identify_list_of_dicts))
+
+print "track output will be length = {0}".format(len(track_list_of_dicts))
 
 
 
