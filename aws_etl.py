@@ -300,14 +300,13 @@ def batch_executor(start_date, end_date, key_name):
             date_plus_x = datetime.datetime.strftime(
                 datetime.datetime.strptime(start_date, '%Y%m%d') + datetime.timedelta(days=x), '%Y%m%d')
             batch_start_dates.append(date_plus_x)
+    batch_start_dates.append(end_date)
     for el in range(0, len(batch_start_dates) - 1):
         if el < len(batch_start_dates):
             end_date_1 = batch_start_dates[el + 1]
             execute_etl(str(batch_start_dates[el]), end_date_1, key_name)
         else:
-            execute_etl(str(batch_start_dates[el]), end_date, key_name)
-
-
+            execute_etl(str(batch_start_dates[el]), str(batch_start_dates[el + 1]), key_name)
 
 
 batch_executor(start_date, end_date, key_name)
