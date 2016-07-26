@@ -13,13 +13,13 @@ s3c = boto3.client('s3')
 # start_date = str(raw_input("Enter the start date in the 'yyyymmdd' format: \n"))
 # end_date = str(raw_input("Enter the end date in the 'yyyymmdd' format: \n"))
 
-##FOR TESTING##
+##customer names + API Key##
 #chartio89732323  20160610 20160715
 #panda43584783
 #flow23947635
 key_name = "chartio89732323"
-start_date = "20160615"
-end_date = "20160620"
+start_date = "20160610"
+end_date = "20160730"
 
 
 def create_filenames(start_date, end_date, key_name):
@@ -61,9 +61,6 @@ def data_pull(start_date, end_date, key_name):
     return file_names_list
 
 
-files = data_pull(start_date, end_date, key_name)
-
-
 def decompress_files(list_of_file_names):
     full_file = {}
     for i in list_of_file_names:
@@ -71,41 +68,6 @@ def decompress_files(list_of_file_names):
             file_content = f.read()
             full_file[i] = file_content
     return full_file
-
-
-full_file = decompress_files(files)
-full_file_keys = full_file.keys()
-
-bad_files = []
-messages_striped = []
-for i in full_file_keys:
-    full_file[i] = full_file[i].strip("\n").split("\t")
-    for x in range(0, len(full_file[i])):
-        if full_file[i][x][0] == "{":
-            if full_file[i][x][-1] != "}":
-                messages_striped.append(full_file[i][x][:-20])
-            else:
-                messages_striped.append(full_file[i][x])
-            if len(messages_striped) % 100000 == 0:
-                print "len messages striped: \n {0}".format(len(messages_striped))
-
-
-list_of_pages = []
-list_of_identify = []
-list_of_track = []
-list_of_exceptions = []
-list_of_alias = []
-for j in range(0, len(messages_striped)):
-    if messages_striped[j].find("\"type\":\"page\"") > 0:
-        list_of_pages.append(messages_striped[j])
-    elif messages_striped[j].find("\"type\":\"identify\"") > 0:
-        list_of_identify.append(messages_striped[j])
-    elif messages_striped[j].find("\"type\":\"track\"") > 0:
-        list_of_track.append(messages_striped[j])
-    elif messages_striped[j].find("\"type\":\"alias\"") > 0:
-        list_of_alias.append(messages_striped[j])
-    else:
-        list_of_exceptions.append(messages_striped[j])
 
 
 #New JSON parser
@@ -157,6 +119,8 @@ def identify_json_parser(list_of_identify_dicts):
         id_dict['user_id'] = list_of_jsons[i]['user_id']
         id_dict['time_stamp'] = list_of_jsons[i]['time']
         identify_object.append(id_dict)
+        if i % 10000 == 0:
+            print "parsed {0} identify lines".format(i)
     return identify_object
 
 
@@ -175,9 +139,9 @@ def track_json_parser(list_of_track_dicts):
         track_dict['event'] = list_of_jsons[i]['event']
         track_dict['organization_id'] = list_of_jsons[i]['organization_id']
         track_object.append(track_dict)
+        if i % 10000 == 0:
+            print "parsed {0} identify lines".format(i)
     return track_object
-
-##QA
 
 
 #for Pandadocs
@@ -287,18 +251,67 @@ def write_to_csv(list_of_dictionaries, output_name, key_name):
                 continue
 
 
-identify_list_of_dicts = identify_json_parser(list_of_identify)
-track_list_of_dicts = track_json_parser(list_of_track)
+def execute_etl(start_date, end_date, key_name):
+    files = data_pull(start_date, end_date, key_name)
+    full_file = decompress_files(files)
+    full_file_keys = full_file.keys()
+    messages_striped = []
+    list_of_pages = []
+    list_of_identify = []
+    list_of_track = []
+    list_of_exceptions = []
+    list_of_alias = []
+    for i in full_file_keys:
+        full_file[i] = full_file[i].strip("\n").split("\t")
+        for x in range(0, len(full_file[i])):
+            if full_file[i][x][0] == "{":
+                if full_file[i][x][-1] != "}":
+                    messages_striped.append(full_file[i][x][:-20])
+                else:
+                    messages_striped.append(full_file[i][x])
+                if len(messages_striped) % 100000 == 0:
+                    print "len messages stripped: \n {0}".format(len(messages_striped))
+    for j in range(0, len(messages_striped)):
+        if messages_striped[j].find("\"type\":\"page\"") > 0:
+            list_of_pages.append(messages_striped[j])
+        elif messages_striped[j].find("\"type\":\"identify\"") > 0:
+            list_of_identify.append(messages_striped[j])
+        elif messages_striped[j].find("\"type\":\"track\"") > 0:
+            list_of_track.append(messages_striped[j])
+        elif messages_striped[j].find("\"type\":\"alias\"") > 0:
+            list_of_alias.append(messages_striped[j])
+        else:
+            list_of_exceptions.append(messages_striped[j])
+    identify_list_of_dicts = identify_json_parser(list_of_identify)
+    track_list_of_dicts = track_json_parser(list_of_track)
+    output_file_identify = str(key_name) + "_identify" + str(start_date)
+    output_file_track = str(key_name) + "_track" + str(start_date)
+    write_to_csv(identify_list_of_dicts, output_file_identify, key_name)
+    write_to_csv(track_list_of_dicts, output_file_track, key_name)
+    print "identify output will be length = {0}".format(len(identify_list_of_dicts))
+    print "track output will be length = {0}".format(len(track_list_of_dicts))
 
-output_file_identify = str(key_name) + "_identify"
-output_file_track = str(key_name) + "_track"
 
-write_to_csv(identify_list_of_dicts, output_file_identify, key_name)
-write_to_csv(track_list_of_dicts, output_file_track, key_name)
+def batch_executor(start_date, end_date, key_name):
+    batch_start_dates = [start_date]
+    for x in range(0, int(end_date) - int(start_date)):
+        if x%10 == 0:
+            batch_start_dates.append(str(int(start_date) + x))
+    for el in range(0, len(batch_start_dates)):
+        if el == len(batch_start_dates):
+            execute_etl(batch_start_dates[el], end_date, key_name)
+        else:
+            end_date = batch_start_dates[el + 1]
+            execute_etl(batch_start_dates[el], end_date, key_name)
 
-print "identify output will be length = {0}".format(len(identify_list_of_dicts))
 
-print "track output will be length = {0}".format(len(track_list_of_dicts))
+batch_executor(start_date, end_date, key_name)
+
+
+
+
+
+
 
 
 
