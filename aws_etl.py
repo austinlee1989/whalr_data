@@ -18,7 +18,7 @@ s3c = boto3.client('s3')
 #panda43584783
 #flow23947635
 key_name = "chartio89732323"
-start_date = "20160610"
+start_date = "20160720"
 end_date = "20160730"
 
 
@@ -293,23 +293,24 @@ def execute_etl(start_date, end_date, key_name):
 
 
 def batch_executor(start_date, end_date, key_name):
-    batch_start_dates = [start_date]
-    for x in range(0, int(end_date) - int(start_date)):
+    batch_start_dates = []
+    duration = int((datetime.datetime.strptime(end_date, '%Y%m%d') - datetime.datetime.strptime(start_date, '%Y%m%d')).days)
+    for x in range(0, duration):
         if x%10 == 0:
-            batch_start_dates.append(str(int(start_date) + x))
-    for el in range(0, len(batch_start_dates)):
-        if el == len(batch_start_dates):
-            execute_etl(batch_start_dates[el], end_date, key_name)
+            date_plus_x = datetime.datetime.strftime(
+                datetime.datetime.strptime(start_date, '%Y%m%d') + datetime.timedelta(days=x), '%Y%m%d')
+            batch_start_dates.append(date_plus_x)
+    for el in range(0, len(batch_start_dates) - 1):
+        if el < len(batch_start_dates):
+            end_date_1 = batch_start_dates[el + 1]
+            execute_etl(str(batch_start_dates[el]), end_date_1, key_name)
         else:
-            end_date = batch_start_dates[el + 1]
-            execute_etl(batch_start_dates[el], end_date, key_name)
+            execute_etl(str(batch_start_dates[el]), end_date, key_name)
+
+
 
 
 batch_executor(start_date, end_date, key_name)
-
-
-
-
 
 
 
