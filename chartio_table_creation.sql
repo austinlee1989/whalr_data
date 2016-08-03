@@ -1,5 +1,10 @@
 ## Chartio Table Creation ##
 
+
+#### SEVERAL DAY GAP IN DATA FROM 07/12 - 07/17 (?) ####
+
+select distinct properties_category from chartio.track;
+
 ##Create Track Table ##
 drop table if exists chartio.track;
 create table chartio.track (properties_name varchar(32), user_id varchar(128), properties_details text, organization_id int, properties_category varchar(32), time_stamp int, event varchar(16),
@@ -9,11 +14,62 @@ create table chartio.track (properties_name varchar(32), user_id varchar(128), p
 SET autocommit=0;
 LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/track/chartio89732323_track20160720.csv'
 INTO TABLE chartio.track
-FIELDS TERMINATED BY ','
+FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (properties_name, user_id, properties_details, organization_id, properties_category, time_stamp, event);
 COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/track/chartio89732323_track20160610.csv'
+INTO TABLE chartio.track
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(properties_name, user_id, properties_details, organization_id, properties_category, time_stamp, event);
+COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/track/chartio89732323_track20160620.csv'
+INTO TABLE chartio.track
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(properties_name, user_id, properties_details, organization_id, properties_category, time_stamp, event);
+COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/track/chartio89732323_track20160630.csv'
+INTO TABLE chartio.track
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(properties_name, user_id, properties_details, organization_id, properties_category, time_stamp, event);
+COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/track/chartio89732323_track20160710.csv'
+INTO TABLE chartio.track
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(properties_name, user_id, properties_details, organization_id, properties_category, time_stamp, event);
+COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/track/chartio89732323_track20160720.csv'
+INTO TABLE chartio.track
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(properties_name, user_id, properties_details, organization_id, properties_category, time_stamp, event);
+COMMIT;
+
+
+
+
+
+
 
 ## Identify table
 drop table if exists chartio.identify;
@@ -22,12 +78,50 @@ Create Table chartio.identify
 		,index(user_id,company_id,time_stamp, company_signup_type, company_org_status));
         
 SET autocommit=0;
-LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/identify/chartio89732323_identify20160720.csv' 
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/identify/chartio89732323_identify20160610.csv' 
 INTO TABLE chartio.identify
-FIELDS TERMINATED BY ','  LINES TERMINATED BY '\n' 
+FIELDS TERMINATED BY '\t'  LINES TERMINATED BY '\n' 
 IGNORE 1 LINES 
 (context_ip, user_id, name, company_signup_type, created_at, company_org_status, company_id, company_feature_set, company_trial_start, company_trial_end, company_name, time_stamp, company_created_at, email, company_selected_plan);
 COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/identify/chartio89732323_identify20160620.csv' 
+INTO TABLE chartio.identify
+FIELDS TERMINATED BY '\t'  LINES TERMINATED BY '\n' 
+IGNORE 1 LINES 
+(context_ip, user_id, name, company_signup_type, created_at, company_org_status, company_id, company_feature_set, company_trial_start, company_trial_end, company_name, time_stamp, company_created_at, email, company_selected_plan);
+COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/identify/chartio89732323_identify20160630.csv' 
+INTO TABLE chartio.identify
+FIELDS TERMINATED BY '\t'  LINES TERMINATED BY '\n' 
+IGNORE 1 LINES 
+(context_ip, user_id, name, company_signup_type, created_at, company_org_status, company_id, company_feature_set, company_trial_start, company_trial_end, company_name, time_stamp, company_created_at, email, company_selected_plan);
+COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/identify/chartio89732323_identify20160710.csv' 
+INTO TABLE chartio.identify
+FIELDS TERMINATED BY '\t'  LINES TERMINATED BY '\n' 
+IGNORE 1 LINES 
+(context_ip, user_id, name, company_signup_type, created_at, company_org_status, company_id, company_feature_set, company_trial_start, company_trial_end, company_name, time_stamp, company_created_at, email, company_selected_plan);
+COMMIT;
+
+SET autocommit=0;
+LOAD DATA LOCAL INFILE '/Users/austin.lee/Desktop/working/output/chartio89732323/identify/chartio89732323_identify20160720.csv' 
+INTO TABLE chartio.identify
+FIELDS TERMINATED BY '\t'  LINES TERMINATED BY '\n' 
+IGNORE 1 LINES 
+(context_ip, user_id, name, company_signup_type, created_at, company_org_status, company_id, company_feature_set, company_trial_start, company_trial_end, company_name, time_stamp, company_created_at, email, company_selected_plan);
+COMMIT;
+
+
+
+
+
+
 
 ##Update Identify to fix multi line selected plans ##
 update chartio.identify set company_selected_plan = substring_index(company_selected_plan,'\n',1) where company_selected_plan like '%\n%';

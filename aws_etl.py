@@ -18,7 +18,7 @@ s3c = boto3.client('s3')
 #panda43584783
 #flow23947635
 key_name = "chartio89732323"
-start_date = "20160720"
+start_date = "20160610"
 end_date = "20160730"
 
 
@@ -237,7 +237,7 @@ def write_to_csv(list_of_dictionaries, output_name, key_name):
         os.makedirs(csv_directory)
     with open(csv_filename, 'wr') as csv_output:
         fieldnames = list_of_dictionaries[0].keys()
-        writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
+        writer = csv.DictWriter(csv_output, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
         encode_error_counter = 0
         for i in range(0, len(list_of_dictionaries)):
@@ -311,7 +311,8 @@ def batch_executor(start_date, end_date, key_name):
 
 batch_executor(start_date, end_date, key_name)
 
-
-
+# To do:
+## write concatanator script for final csv output
+## fix unicode errors (less than .5% of all data points have unicode errors..)
 
 

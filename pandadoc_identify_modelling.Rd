@@ -28,3 +28,23 @@ id_data$country[na.omit(match(locations_coded[,1],id_data$location))] <- locatio
 id_data_test <- id_data
 
 merged_id_geo <- merge(x = id_data, y = locations_coded, by = "location", all.x = TRUE)
+
+plot(id_data$converted_to_active,id_data$employee_count)
+
+id_data_converted <- subset(id_data, converted_to_active == 1 & status == 'Verified')
+id_data_churned <- subset(id_data, converted_to_active == 0 & status == 'Verified')
+
+id_data_converted_US <- subset(id_data, converted_to_active == 1 & status == 'Verified' & country == 'United States')
+id_data_churned_US <- subset(id_data, converted_to_active == 0 & status == 'Verified' & country == 'United States')
+
+id_data_us_verified <- subset(id_data, status == 'Verified' & country == 'United States')
+
+mod_1 <- lm(converted_to_active ~ as.numeric(employee_count), data = id_data_us_verified)
+
+hist(as.numeric(id_data_converted_US$employee_count))
+hist(as.numeric(id_data_churned_US$employee_count))
+
+emp_density_converted <- density(as.numeric(id_data_converted$employee_count))
+emp_density_churned <- density(as.numeric(id_data_churned$employee_count))
+plot(emp_density_converted, xlim = c(0,7500))
+lines(emp_density_churned)

@@ -280,17 +280,88 @@ plot(nn_2)
 nn_4 <- neuralnet(f,data=train,hidden=c(7,3),linear.output=T)
 plot(nn_4)
 
+
+
+
 ##the BIG one
 
 mydata_nn <- mydata[,!(names(mydata) == 'user_id')]
-
 index <- sample(1:nrow(mydata_nn),round(0.75*nrow(mydata_nn)))
 train <- mydata_nn[index,]
 test <- mydata_nn[-index,]
 
+##LM
+lm.fit <- glm(converted_to_active~., data=train)
+summary(lm.fit)
+pr.lm <- predict(lm.fit,test)
+MSE.lm <- sum((pr.lm - test$converted_to_active)^2)/nrow(test)
+
+## Logit
+log.fit <- glm(converted_to_active ~ . , data = train, family = "binomial")
+pr.log <- predict(log.fit,test)
+
+### Convert to Probability ###
+log.intercept <- log.fit$coefficients[1]
+pr.log_prob <- exp(log.intercept + pr.log)/(1 + exp(log.intercept + pr.log))
+
+MSE.log <- sum((pr.log - test$converted_to_active)^2)/nrow(test)
+MSE.log_prob <- sum((pr.log_prob - test$converted_to_active)^2)/nrow(test)
 
 n <- names(train)
 f <- as.formula(paste("converted_to_active ~", paste(n[!n %in% "converted_to_active"], collapse = " + ")))
 nn_2 <- neuralnet(f,data=train,hidden=c(40,20),linear.output=T, stepmax = 100000, rep = 10)
 plot(nn_2)
 save(nn_2,file ="neural_net_full.RData")
+
+## Testing NN ##
+pr.nn_1 <- compute(nn_2,test[,2:68], rep = 1)
+test.r <- test$converted_to_active
+MSE.nn_1 <- sum((test.r - pr.nn_1$net.result)^2)/nrow(test)
+
+pr.nn_2 <- compute(nn_2,test[,2:68], rep = 2)
+test.r2 <- test$converted_to_active
+MSE.nn_2 <- sum((test.r2 - pr.nn_2$net.result)^2)/nrow(test)
+
+
+## Compare models ##
+
+print(paste(MSE.lm,MSE.log_prob,MSE.nn_1,MSE.nn_2))
+
+par(mfrow=c(2,2))
+plot(test$converted_to_active,pr.nn_2$net.result,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
+abline(0,1,lwd=2)
+legend('bottomright',legend='NN',pch=18,col='red', bty='n')
+
+plot(test$converted_to_active,pr.lm,col='blue',main='Real vs predicted lm',pch=18, cex=0.7)
+abline(0,1,lwd=2)
+legend('bottomright',legend='LM',pch=18,col='blue', bty='n', cex=.95)
+
+plot(test$converted_to_active,pr.log_prob,col='blue',main='Real vs predicted log',pch=18, cex=0.7)
+abline(0,1,lwd=2)
+legend('bottomright',legend='LM',pch=18,col='blue', bty='n', cex=.95)
+
+hist(test$converted_to_active, breaks = 25, prob = TRUE, col = "gray", main = "Prob. of Conversion", xlab="Likelihood of Conversion Prob. Bucket") 
+hist(1)
+lines(density(pr.log_prob, adjust = 10), col = "Blue", lwd = TRUE)
+lines(density(pr.lm, adjust = 10), col = "Red", lwd = TRUE)
+lines(density(pr.nn_2$net.result, adjust = 10), col = "Green", lwd = TRUE)
+
+
+### Back to linear model ###
+
+##convert to odds-ratio
+lm.fit_sum <- summary(lm.fit)
+lm_coef <- t(lm.fit_sum$coefficients[,1])
+lm.fit_p_value <- t(lm.fit_sum$coefficients[,4])
+lm_all <- rbind(lm_coef,lm.fit_p_value )
+lm_all <- t(lm_all)
+lm_all <- lm_all[order(-lm_all[,1]),]
+
+
+lm_all_sig_only <- lm_all[lm_all[,2] < .05,]
+
+###PCA for lm
+
+pca_lm <- prcomp(train, center = TRUE)
+plot(pca_lm, type ='l')
+pca_lm
