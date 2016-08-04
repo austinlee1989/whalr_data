@@ -171,3 +171,5 @@ convert_svm <- subset(test_full_svm, pr.svm_c == 2)
 convert_svm_all <- subset(test_full_svm, converted == 1 | pr.svm_c == 2)
 
 save(svm.model_c, file = "/Users/austin.lee/Desktop/Chartio/svm_model_c.RData")
+save(test_scaled, file = "/Users/austin.lee/Desktop/Chartio/scaling_parameters.RData")
+write.svm(svm.model_c,svm.file = "svmmodel.svm")
