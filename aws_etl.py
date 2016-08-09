@@ -17,9 +17,9 @@ s3c = boto3.client('s3')
 #chartio89732323  20160610 20160715
 #panda43584783
 #flow23947635
-key_name = "chartio89732323"
-start_date = "20160801"
-end_date = "20160808"
+key_name = "flow23947635"
+start_date = "20160501"
+end_date = "20160810"
 
 
 def create_filenames(start_date, end_date, key_name):
@@ -90,6 +90,61 @@ def json_parser_general(list_of_dicts):
 
 ##designed for chartio ##
 
+# def identify_json_parser(list_of_identify_dicts):
+#     list_of_jsons = json_parser_general(list_of_identify_dicts)
+#     identify_object = []
+#     for i in range(0, len(list_of_jsons)):
+#         id_dict = dict()
+#         if 'traits' in list_of_jsons[i]:
+#             traits = list_of_jsons[i]['traits']
+#             for key, value in traits.items():
+#                 if key != 'company':
+#                     id_dict[key] = value
+#             if 'company' in list_of_jsons[i]['traits']:
+#                 company = list_of_jsons[i]['traits']['company']
+#                 for key, value in company.items():
+#                     new_key = "company_" + key.encode('utf-8')
+#                     id_dict[new_key] = value
+#         if 'context' in list_of_jsons[i]:
+#             context = list_of_jsons[i]['context']
+#             for key, value in context.items():
+#                 if key not in ['traits', 'page', 'library', 'campaign', 'user_agent']:
+#                     con_key = "context_" + key.encode('utf-8')
+#                     id_dict[con_key] = value
+#            ##save space- pulling out page info
+#             # page = list_of_jsons[i]['context']['page']
+#             # for key, value in page.items():
+#             #     page_key = "page_" + key.encode('utf-8')
+#             #     id_dict[page_key] = value
+#         id_dict['user_id'] = list_of_jsons[i]['user_id']
+#         id_dict['time_stamp'] = list_of_jsons[i]['time']
+#         identify_object.append(id_dict)
+#         if i % 10000 == 0:
+#             print "parsed {0} identify lines".format(i)
+#     return identify_object
+#
+#
+# def track_json_parser(list_of_track_dicts):
+#     list_of_jsons = json_parser_general(list_of_track_dicts)
+#     track_object = []
+#     for i in range(0, len(list_of_jsons)):
+#         track_dict = dict()
+#         if 'properties' in list_of_jsons[i]:
+#             properties = list_of_jsons[i]['properties']
+#             for key, value in properties.items():
+#                 properties_key = "properties_" + key.encode('utf-8')
+#                 track_dict[properties_key] = value
+#         track_dict['user_id'] = list_of_jsons[i]['user_id']
+#         track_dict['time_stamp'] = list_of_jsons[i]['time']
+#         track_dict['event'] = list_of_jsons[i]['event']
+#         track_dict['organization_id'] = list_of_jsons[i]['organization_id']
+#         track_object.append(track_dict)
+#         if i % 10000 == 0:
+#             print "parsed {0} identify lines".format(i)
+#     return track_object
+
+# For Flow:
+
 def identify_json_parser(list_of_identify_dicts):
     list_of_jsons = json_parser_general(list_of_identify_dicts)
     identify_object = []
@@ -97,26 +152,24 @@ def identify_json_parser(list_of_identify_dicts):
         id_dict = dict()
         if 'traits' in list_of_jsons[i]:
             traits = list_of_jsons[i]['traits']
-            for key, value in traits.items():
-                if key != 'company':
-                    id_dict[key] = value
-            if 'company' in list_of_jsons[i]['traits']:
-                company = list_of_jsons[i]['traits']['company']
-                for key, value in company.items():
-                    new_key = "company_" + key.encode('utf-8')
-                    id_dict[new_key] = value
-        if 'context' in list_of_jsons[i]:
-            context = list_of_jsons[i]['context']
-            for key, value in context.items():
-                if key not in ['traits', 'page', 'library', 'campaign', 'user_agent']:
-                    con_key = "context_" + key.encode('utf-8')
-                    id_dict[con_key] = value
-           ##save space- pulling out page info
-            # page = list_of_jsons[i]['context']['page']
-            # for key, value in page.items():
-            #     page_key = "page_" + key.encode('utf-8')
-            #     id_dict[page_key] = value
-        id_dict['user_id'] = list_of_jsons[i]['user_id']
+            if 'email' in list_of_jsons[i]['traits']:
+                id_dict['email'] = list_of_jsons[i]['traits']['email']
+            if 'plan_name' in list_of_jsons[i]['traits']:
+                id_dict['plan_name'] = list_of_jsons[i]['traits']['plan_name']
+            if 'created_at ' in list_of_jsons[i]['traits']:
+                id_dict['created_at'] = list_of_jsons[i]['traits']['created_at']
+            # for key, value in traits.items():
+            #     id_dict[key] = value
+        # if 'context' in list_of_jsons[i]:
+        #     context = list_of_jsons[i]['context']
+        #     for key, value in context.items():
+        #         if key not in ['traits', 'page', 'library', 'campaign', 'user_agent']:
+        #             con_key = "context_" + key.encode('utf-8')
+        #             id_dict[con_key] = value
+        if 'user_id' in list_of_jsons[i]:
+            id_dict['user_id'] = list_of_jsons[i]['user_id']
+        # if 'anonymous_id' in list_of_jsons[i]:
+        #     id_dict['anonymous_id'] = list_of_jsons[i]['anonymous_id']
         id_dict['time_stamp'] = list_of_jsons[i]['time']
         identify_object.append(id_dict)
         if i % 10000 == 0:
@@ -129,105 +182,107 @@ def track_json_parser(list_of_track_dicts):
     track_object = []
     for i in range(0, len(list_of_jsons)):
         track_dict = dict()
-        if 'properties' in list_of_jsons[i]:
-            properties = list_of_jsons[i]['properties']
-            for key, value in properties.items():
-                properties_key = "properties_" + key.encode('utf-8')
-                track_dict[properties_key] = value
-        track_dict['user_id'] = list_of_jsons[i]['user_id']
+        # if 'properties' in list_of_jsons[i]:
+        #     properties = list_of_jsons[i]['properties']
+        #     for key, value in properties.items():
+        #         properties_key = "properties_" + key.encode('utf-8')
+        #         track_dict[properties_key] = value
+        if 'user_id' in list_of_jsons[i]:
+            track_dict['user_id'] = list_of_jsons[i]['user_id']
+        # if 'anonymous_id' in list_of_jsons[i]:
+        #     track_dict['anonymous_id'] = list_of_jsons[i]['anonymous_id']
         track_dict['time_stamp'] = list_of_jsons[i]['time']
         track_dict['event'] = list_of_jsons[i]['event']
-        track_dict['organization_id'] = list_of_jsons[i]['organization_id']
+       #track_dict['organization_id'] = list_of_jsons[i]['organization_id']
         track_object.append(track_dict)
         if i % 10000 == 0:
-            print "parsed {0} identify lines".format(i)
+            print "parsed {0} track lines".format(i)
     return track_object
 
-
 #for Pandadocs
-def identify_parser(identify):
-    identify_outfile = []
-    for i in range(0, len(identify)):
-        identify_dict = {'user_id': '', 'anonymous_id': '', 'email': '', 'name': '', 'time': '', 'subscription_state': '', 'members_count': ''}
-        # user_id
-        user_id_start = identify[i].find("\"user_id\":\"") + len("\"user_id\":\"")
-        user_id_end = identify[i].find("\",", user_id_start)
-        user_id = identify[i][user_id_start: user_id_end]
-        identify_dict['user_id'] = user_id
-
-        # anon_id
-
-        anon_id_start = identify[i].find("\"anonymous_id\":\"") + len("\"anonymous_id\":\"")
-        anon_id_end = identify[i].find("\",", anon_id_start)
-        anonymous_id = identify[i][anon_id_start: anon_id_end]
-        identify_dict['anonymous_id'] = anonymous_id
-
-        #traits
-
-        traits_start = identify[i].find("\"traits\":{") + len("\"traits\":{")
-        traits_end = identify[i].find("},", traits_start)
-        traits = identify[i][traits_start: traits_end]
-
-        #subtraits
-        if traits.find("email\":") != -1:
-            email_start = traits.find("email\":\"") + len("email\":\"")
-            email_end = traits.find("\",", email_start)
-            email = traits[email_start: email_end]
-            identify_dict['email'] = email
-        if traits.find("\"name\":\"") != -1:
-            name_start = traits.find("\"name\":\"") + len("\"name\":\"")
-            name_end = traits.find("\",", name_start)
-            name = traits[name_start: name_end]
-            identify_dict['name'] = name
-        if traits.find("subscription_state\":\"") != -1:
-            subscription_start = traits.find("subscription_state\":\"") + len("subscription_state\":\"")
-            subscription_end = traits.find("\",", subscription_start)
-            subscription = traits[subscription_start: subscription_end]
-            identify_dict['subscription_state'] = subscription
-        if traits.find("members_count") != -1:
-            members_start = traits.find("members_count\":") + len("members_count\":")
-            members_end = traits.find("}", members_start)
-            members_count = traits[members_start: members_end]
-            identify_dict['members_count'] = members_count
-
-        #time
-        time_start = identify[i].find("\"time\":") + len("\"time\":")
-        time_end = identify[i].find("}", time_start)
-        time = identify[i][time_start: time_end]
-        identify_dict['time'] = time
-        identify_outfile.append(identify_dict)
-    return identify_outfile
-
-
-def track_parser(track):
-    track_outfile = []
-    for i in range(0, len(track)):
-        track_dict = {'user_id': '', 'event': '', 'time': '', 'anonymous_id': ''}
-        # user_id
-        if track[i].find("\"anonymous_id\":\"") == -1:
-            user_id_start = track[i].find("\"user_id\":\"") + len("\"user_id\":\"")
-            user_id_end = track[i].find("\",", user_id_start)
-            user_id = track[i][user_id_start: user_id_end]
-            anonymous_id = "null"
-        else:
-            user_id = "null"
-            anon_id_start = track[i].find("\"anonymous_id\":\"") + len("\"anonymous_id\":\"")
-            anon_id_end = track[i].find("\",", anon_id_start)
-            anonymous_id = track[i][anon_id_start: anon_id_end]
-        track_dict['anonymous_id'] = anonymous_id
-        track_dict['user_id'] = user_id
-        # time
-        time_start = track[i].find("\"time\":") + len("\"time\":")
-        time_end = track[i].find("}", time_start)
-        time = track[i][time_start: time_end]
-        track_dict['time'] = time
-        # event
-        event_start = track[i].find("\"event\":\"") + len("\"event\":\"")
-        event_end = track[i].find("\",", event_start)
-        event = track[i][event_start: event_end]
-        track_dict['event'] = event
-        track_outfile.append(track_dict)
-    return track_outfile
+# def identify_parser(identify):
+#     identify_outfile = []
+#     for i in range(0, len(identify)):
+#         identify_dict = {'user_id': '', 'anonymous_id': '', 'email': '', 'name': '', 'time': '', 'subscription_state': '', 'members_count': ''}
+#         # user_id
+#         user_id_start = identify[i].find("\"user_id\":\"") + len("\"user_id\":\"")
+#         user_id_end = identify[i].find("\",", user_id_start)
+#         user_id = identify[i][user_id_start: user_id_end]
+#         identify_dict['user_id'] = user_id
+#
+#         # anon_id
+#
+#         anon_id_start = identify[i].find("\"anonymous_id\":\"") + len("\"anonymous_id\":\"")
+#         anon_id_end = identify[i].find("\",", anon_id_start)
+#         anonymous_id = identify[i][anon_id_start: anon_id_end]
+#         identify_dict['anonymous_id'] = anonymous_id
+#
+#         #traits
+#
+#         traits_start = identify[i].find("\"traits\":{") + len("\"traits\":{")
+#         traits_end = identify[i].find("},", traits_start)
+#         traits = identify[i][traits_start: traits_end]
+#
+#         #subtraits
+#         if traits.find("email\":") != -1:
+#             email_start = traits.find("email\":\"") + len("email\":\"")
+#             email_end = traits.find("\",", email_start)
+#             email = traits[email_start: email_end]
+#             identify_dict['email'] = email
+#         if traits.find("\"name\":\"") != -1:
+#             name_start = traits.find("\"name\":\"") + len("\"name\":\"")
+#             name_end = traits.find("\",", name_start)
+#             name = traits[name_start: name_end]
+#             identify_dict['name'] = name
+#         if traits.find("subscription_state\":\"") != -1:
+#             subscription_start = traits.find("subscription_state\":\"") + len("subscription_state\":\"")
+#             subscription_end = traits.find("\",", subscription_start)
+#             subscription = traits[subscription_start: subscription_end]
+#             identify_dict['subscription_state'] = subscription
+#         if traits.find("members_count") != -1:
+#             members_start = traits.find("members_count\":") + len("members_count\":")
+#             members_end = traits.find("}", members_start)
+#             members_count = traits[members_start: members_end]
+#             identify_dict['members_count'] = members_count
+#
+#         #time
+#         time_start = identify[i].find("\"time\":") + len("\"time\":")
+#         time_end = identify[i].find("}", time_start)
+#         time = identify[i][time_start: time_end]
+#         identify_dict['time'] = time
+#         identify_outfile.append(identify_dict)
+#     return identify_outfile
+#
+#
+# def track_parser(track):
+#     track_outfile = []
+#     for i in range(0, len(track)):
+#         track_dict = {'user_id': '', 'event': '', 'time': '', 'anonymous_id': ''}
+#         # user_id
+#         if track[i].find("\"anonymous_id\":\"") == -1:
+#             user_id_start = track[i].find("\"user_id\":\"") + len("\"user_id\":\"")
+#             user_id_end = track[i].find("\",", user_id_start)
+#             user_id = track[i][user_id_start: user_id_end]
+#             anonymous_id = "null"
+#         else:
+#             user_id = "null"
+#             anon_id_start = track[i].find("\"anonymous_id\":\"") + len("\"anonymous_id\":\"")
+#             anon_id_end = track[i].find("\",", anon_id_start)
+#             anonymous_id = track[i][anon_id_start: anon_id_end]
+#         track_dict['anonymous_id'] = anonymous_id
+#         track_dict['user_id'] = user_id
+#         # time
+#         time_start = track[i].find("\"time\":") + len("\"time\":")
+#         time_end = track[i].find("}", time_start)
+#         time = track[i][time_start: time_end]
+#         track_dict['time'] = time
+#         # event
+#         event_start = track[i].find("\"event\":\"") + len("\"event\":\"")
+#         event_end = track[i].find("\",", event_start)
+#         event = track[i][event_start: event_end]
+#         track_dict['event'] = event
+#         track_outfile.append(track_dict)
+#     return track_outfile
 
 
 def write_to_csv(list_of_dictionaries, output_name, key_name):
@@ -236,8 +291,12 @@ def write_to_csv(list_of_dictionaries, output_name, key_name):
     if not os.path.exists(csv_directory):
         os.makedirs(csv_directory)
     with open(csv_filename, 'wr') as csv_output:
-        fieldnames = list_of_dictionaries[0].keys()
-        writer = csv.DictWriter(csv_output, delimiter="\t", fieldnames=fieldnames)
+        fieldname_set = set()
+        for elements in list_of_dictionaries:
+            for keys in elements.keys():
+                fieldname_set.add(keys)
+        fieldnames = list(fieldname_set)
+        writer = csv.DictWriter(csv_output, delimiter="\t", fieldnames=fieldnames, restval='null')
         writer.writeheader()
         encode_error_counter = 0
         for i in range(0, len(list_of_dictionaries)):
@@ -283,13 +342,14 @@ def execute_etl(start_date, end_date, key_name):
         else:
             list_of_exceptions.append(messages_striped[j])
     identify_list_of_dicts = identify_json_parser(list_of_identify)
-    track_list_of_dicts = track_json_parser(list_of_track)
+    # track_list_of_dicts = track_json_parser(list_of_track)
+    # output_file_track = str(key_name) + "_track" + str(start_date)
+    # write_to_csv(track_list_of_dicts, output_file_track, key_name)
+    # print "track output will be length = {0}".format(len(track_list_of_dicts))
     output_file_identify = str(key_name) + "_identify" + str(start_date)
-    output_file_track = str(key_name) + "_track" + str(start_date)
     write_to_csv(identify_list_of_dicts, output_file_identify, key_name)
-    write_to_csv(track_list_of_dicts, output_file_track, key_name)
     print "identify output will be length = {0}".format(len(identify_list_of_dicts))
-    print "track output will be length = {0}".format(len(track_list_of_dicts))
+
 
 
 def batch_executor(start_date, end_date, key_name):
@@ -310,6 +370,8 @@ def batch_executor(start_date, end_date, key_name):
 
 
 batch_executor(start_date, end_date, key_name)
+
+##easiest to concat files in bash: sed 1d *track*.csv > track_merged.csv
 
 # To do:
 ## write concatanator script for final csv output
