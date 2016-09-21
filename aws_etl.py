@@ -376,8 +376,8 @@ def execute_etl(start_date, end_date, key_name):
             list_of_groups.append(messages_striped[j])
         else:
             list_of_exceptions.append(messages_striped[j])
-    identify_list_of_dicts = identify_json_parser(list_of_identify)
-    group_list_of_dicts = group_json_parser(list_of_groups)
+    #identify_list_of_dicts = identify_json_parser(list_of_identify)
+    #group_list_of_dicts = group_json_parser(list_of_groups)
     track_list_of_dicts = track_json_parser(list_of_track)
     output_file_track = str(key_name) + "_track" + str(start_date)
     write_to_csv(track_list_of_dicts, output_file_track, key_name)
@@ -441,7 +441,7 @@ def concat_csv(key_name):
     csv_cat_writer(track_files, "track", csv_directory)
 
 
-batch_executor(start_date, end_date, key_name)
+#batch_executor(start_date, end_date, key_name)
 concat_csv(key_name)
 
 
