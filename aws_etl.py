@@ -441,7 +441,7 @@ def concat_csv(key_name):
     csv_cat_writer(track_files, "track", csv_directory)
 
 
-#batch_executor(start_date, end_date, key_name)
+batch_executor(start_date, end_date, key_name)
 concat_csv(key_name)
 
 
